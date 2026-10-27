@@ -1,0 +1,587 @@
+@import "tailwindcss";
+
+/* ───────── Токены ───────── */
+
+@theme {
+  --color-bg: #e9e6df;
+  --color-surface: #ffffff;
+  --color-surface-2: #f4f2ed;
+  --color-ink: #1a1613;
+  --color-ink-muted: #6b635b;
+  --color-espresso: #342a22;
+  --color-espresso-2: #4a3c31;
+  --color-line: #ded9d0;
+  --color-on-dark: #f2eee8;
+  --color-on-dark-muted: #c9c0b6;
+  /* Единый акцент: выделение текста, скроллбар. Сменить цвет — только здесь. */
+  --color-accent: #b0714a;
+  --color-on-accent: #ffffff;
+
+  --font-display: var(--font-petale), "Helvetica Neue", Arial, sans-serif;
+  --font-caption: var(--font-dacha), Arial, sans-serif;
+  --font-sans: var(--font-golos), system-ui, "Segoe UI", Arial, sans-serif;
+  --font-mono: var(--font-jetbrains), ui-monospace, Consolas, monospace;
+  /* Вордмарк в шапке и меню. Сменить шрифт логотипа — здесь, в одном месте. */
+  --font-logo: var(--font-dacha), Arial, sans-serif;
+
+  --radius-section: 24px;
+  --radius-card: 18px;
+  --radius-pill: 999px;
+
+  --ease-out-soft: cubic-bezier(0.22, 1, 0.36, 1);
+  /* Общая «подача» появления: интро героя и появление шапки при скролле вверх */
+  --ease-reveal: cubic-bezier(0.215, 0.61, 0.355, 1);
+
+  --breakpoint-xs: 26rem;
+}
+
+:root {
+  /* Алиасы под названия из ТЗ */
+  --bg: var(--color-bg);
+  --surface: var(--color-surface);
+  --surface-2: var(--color-surface-2);
+  --ink: var(--color-ink);
+  --ink-muted: var(--color-ink-muted);
+  --espresso: var(--color-espresso);
+  --espresso-2: var(--color-espresso-2);
+  --line: var(--color-line);
+  --on-dark: var(--color-on-dark);
+
+  --page-gutter: 12px;
+  --stack-gap: 12px;
+  --section-pad-x: 20px;
+  --section-pad-y: 64px;
+  --dur-reveal: 0.8s;
+  --header-h: 72px;
+  --cascade-step: clamp(20px, 7vw, 150px);
+
+  color-scheme: light;
+}
+
+@media (min-width: 1024px) {
+  :root {
+    --page-gutter: 16px;
+    --stack-gap: 16px;
+    --section-pad-x: 56px;
+    --section-pad-y: 88px;
+    --radius-section: 32px;
+    --radius-card: 22px;
+    --header-h: 88px;
+  }
+}
+
+@media (min-width: 1536px) {
+  :root {
+    --section-pad-x: 72px;
+  }
+}
+
+/* ───────── База ───────── */
+
+@layer base {
+  html {
+    background: var(--color-bg);
+    color: var(--color-ink);
+    -webkit-text-size-adjust: 100%;
+    text-rendering: optimizeLegibility;
+  }
+
+  body {
+    font-family: var(--font-sans);
+    font-size: 16px;
+    line-height: 1.55;
+    background: var(--color-bg);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  @media (min-width: 1024px) {
+    body {
+      font-size: 17px;
+    }
+  }
+
+  ::selection {
+    background: var(--color-accent);
+    color: var(--color-on-accent);
+  }
+
+  /* Нативная полоса скрыта: вместо неё — свой скроллбар акцентного цвета (CustomScrollbar),
+     одинаковый на десктопе и телефоне */
+  html {
+    scrollbar-width: none;
+  }
+  html::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* Внутренние прокручиваемые области (модалка, меню) — тонкая акцентная полоса */
+  * {
+    scrollbar-color: var(--color-accent) transparent;
+    scrollbar-width: thin;
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--color-espresso);
+    outline-offset: 3px;
+    border-radius: 6px;
+  }
+
+  .on-dark :focus-visible,
+  [data-tone="dark"] :focus-visible {
+    outline-color: var(--color-on-dark);
+  }
+
+  button {
+    cursor: pointer;
+  }
+
+  img {
+    user-select: none;
+  }
+}
+
+/* Lenis */
+html.lenis,
+html.lenis body {
+  height: auto;
+}
+.lenis:not(.lenis-autoToggle).lenis-stopped {
+  overflow: clip;
+}
+.lenis [data-lenis-prevent] {
+  overscroll-behavior: contain;
+}
+
+/* ───────── Типографика ───────── */
+
+/* Petale Thin — строго от 38px. Минимум каждой шкалы ниже ≥ 38px (кроме h3, где Petale нет). */
+@utility t-hero {
+  font-family: var(--font-display);
+  font-weight: 200;
+  font-size: clamp(76px, 17vw, 260px);
+  line-height: 0.82;
+  letter-spacing: 0.02em;
+  font-synthesis: none;
+}
+
+@utility t-h1 {
+  font-family: var(--font-display);
+  font-weight: 200;
+  font-size: clamp(38px, 5.2vw, 76px);
+  line-height: 1.04;
+  letter-spacing: -0.005em;
+  font-synthesis: none;
+}
+
+@utility t-h2 {
+  font-family: var(--font-display);
+  font-weight: 200;
+  font-size: clamp(38px, 4.2vw, 62px);
+  line-height: 1.06;
+  letter-spacing: -0.005em;
+  font-synthesis: none;
+}
+
+@utility t-stat {
+  font-family: var(--font-display);
+  font-weight: 200;
+  font-size: clamp(56px, 7vw, 108px);
+  line-height: 0.9;
+  font-synthesis: none;
+}
+
+@utility t-index {
+  font-family: var(--font-display);
+  font-weight: 200;
+  font-size: clamp(44px, 4vw, 64px);
+  line-height: 1;
+  font-synthesis: none;
+}
+
+@utility t-h3 {
+  font-family: var(--font-sans);
+  font-weight: 500;
+  font-size: clamp(20px, 2vw, 28px);
+  line-height: 1.2;
+  letter-spacing: -0.01em;
+}
+
+@utility t-caption {
+  font-family: var(--font-caption);
+  font-size: 13px;
+  line-height: 1.35;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+@utility t-eyebrow {
+  font-family: var(--font-caption);
+  font-size: 13px;
+  line-height: 1;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--color-ink-muted);
+}
+
+@utility t-mono {
+  font-family: var(--font-mono);
+  font-size: 14px;
+  line-height: 1.4;
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum" 1, "zero" 0;
+}
+
+@utility t-logo {
+  font-family: var(--font-logo);
+  font-size: 18px;
+  line-height: 1;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+}
+
+@utility tnum {
+  font-variant-numeric: tabular-nums;
+}
+
+/* ───────── Сетка и карточки ───────── */
+
+@utility page-stack {
+  display: flex;
+  flex-direction: column;
+  gap: var(--stack-gap);
+  padding-inline: var(--page-gutter);
+}
+
+@utility container-x {
+  width: 100%;
+  max-width: 1560px;
+  margin-inline: auto;
+}
+
+@utility section-card {
+  border-radius: var(--radius-section);
+  padding: var(--section-pad-y) var(--section-pad-x);
+  overflow: clip;
+}
+
+@utility card {
+  border-radius: var(--radius-card);
+}
+
+/* Сетка на хэйрлайнах, как таблица в смете: линии только между ячейками */
+@utility hair-grid {
+  display: grid;
+  gap: 1px;
+  background: var(--color-line);
+  border-block: 1px solid var(--color-line);
+}
+
+/* ───────── Reveal (начальное состояние; GSAP делает .to()) ───────── */
+
+@media (prefers-reduced-motion: no-preference) {
+  .js [data-reveal] {
+    opacity: 0;
+    transform: translateY(28px);
+  }
+  .js [data-reveal="tilt"] {
+    opacity: 0;
+    transform: perspective(1200px) translate3d(0, 60px, 0) rotateX(35deg);
+    transform-origin: 50% 100%;
+  }
+  .js .word-inner:not(.anim-word) {
+    transform: translateY(110%);
+  }
+
+  /* Первый экран анимируется чистым CSS: стартует с первой отрисовки и не ждёт JS,
+     иначе LCP-текст висит скрытым до гидратации. Задержка — через --d. */
+  .anim-in {
+    animation: anim-rise var(--dur-reveal) var(--ease-reveal) both;
+    animation-delay: var(--d, 0s);
+  }
+  .anim-word {
+    animation: anim-word 0.9s cubic-bezier(0.215, 0.61, 0.355, 1) both;
+    animation-delay: var(--d, 0s);
+  }
+  .anim-letter {
+    animation: anim-letter 0.9s cubic-bezier(0.215, 0.61, 0.355, 1) both;
+    animation-delay: var(--d, 0s);
+  }
+}
+
+@keyframes anim-rise {
+  from {
+    opacity: 0;
+    transform: translateY(28px);
+  }
+}
+
+@keyframes anim-word {
+  from {
+    transform: translateY(110%);
+  }
+}
+
+@keyframes anim-letter {
+  from {
+    clip-path: inset(100% 0 0 0);
+    transform: translateY(18%);
+  }
+  to {
+    clip-path: inset(0 0 0 0);
+  }
+}
+
+/* Petale широкий (~0.69em на знак): длинные слова на узких экранах переносим по слогам,
+   а не обрезаем. Кегль ниже 38px не уменьшаем. */
+.word-line {
+  display: block;
+  overflow: hidden;
+  padding-bottom: 0.14em;
+  margin-bottom: -0.14em;
+  padding-right: 0.08em;
+  margin-right: -0.08em;
+  hyphens: auto;
+  -webkit-hyphens: auto;
+  overflow-wrap: anywhere;
+}
+
+.word {
+  display: inline-block;
+  max-width: 100%;
+  padding-right: 0.06em;
+  margin-right: -0.06em;
+}
+
+/* Без will-change: на сотнях слов это сотни GPU-слоёв и лаги при скролле */
+.word-inner {
+  display: inline-block;
+  max-width: 100%;
+}
+
+/* ───────── Переход страниц ───────── */
+
+@media (prefers-reduced-motion: no-preference) {
+  .page-fade {
+    animation: page-fade 300ms var(--ease-out-soft) both;
+  }
+}
+
+@keyframes page-fade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* ───────── Шапка поверх тёмного героя ───────── */
+
+.site-header {
+  --hdr-fg: var(--color-ink);
+  --hdr-muted: var(--color-ink-muted);
+}
+
+body:has([data-hero="dark"]) .site-header[data-solid="false"] {
+  --hdr-fg: var(--color-on-dark);
+  --hdr-muted: color-mix(in srgb, var(--color-on-dark) 72%, transparent);
+}
+
+/* ───────── Прелоадер (адаптация aw-flow «preloader-logo») ───────── */
+
+.preloader {
+  display: none;
+}
+
+html.is-loading {
+  overflow: hidden;
+}
+
+.is-loading .preloader {
+  position: fixed;
+  inset: 0;
+  z-index: 300;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--color-espresso);
+  color: var(--color-on-dark);
+  transition:
+    transform 0.9s cubic-bezier(0.76, 0, 0.24, 1),
+    visibility 0s linear 0.9s;
+}
+
+/* Шторка остаётся в DOM на время ухода: класс is-loading уже снят, поэтому стили дублируем */
+.preloader.preloader--done {
+  position: fixed;
+  inset: 0;
+  z-index: 300;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--color-espresso);
+  color: var(--color-on-dark);
+  transform: translate3d(0, -100%, 0);
+  visibility: hidden;
+  transition:
+    transform 0.9s cubic-bezier(0.76, 0, 0.24, 1),
+    visibility 0s linear 0.9s;
+}
+
+.preloader__logo {
+  display: flex;
+  overflow: hidden;
+  padding: 0.12em 0;
+  font-family: var(--font-display);
+  font-weight: 200;
+  font-size: clamp(56px, 11vw, 140px);
+  line-height: 1;
+  letter-spacing: 0.04em;
+}
+
+.preloader__logo span {
+  display: inline-block;
+  transform: translate3d(0, 115%, 0);
+  animation: preloader-letter 700ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  animation-delay: calc(var(--i) * 60ms + 120ms);
+}
+
+@keyframes preloader-letter {
+  to {
+    transform: none;
+  }
+}
+
+/* Пока шторка на экране, интро первого экрана ждёт */
+.is-loading .anim-in,
+.is-loading .anim-word,
+.is-loading .anim-letter {
+  animation-play-state: paused;
+}
+
+/* ───────── Свой скроллбар (акцентный) ───────── */
+
+.cscroll {
+  position: fixed;
+  top: 8px;
+  right: 3px;
+  bottom: 8px;
+  z-index: 90;
+  width: 10px;
+  display: flex;
+  justify-content: center;
+  cursor: pointer;
+  opacity: 0.55;
+  transition: opacity 0.4s ease;
+}
+
+.cscroll__thumb {
+  position: absolute;
+  top: 0;
+  width: 4px;
+  border-radius: 999px;
+  background: var(--color-accent);
+  will-change: transform;
+  transition: width 0.25s ease;
+  touch-action: none;
+}
+
+.cscroll:hover,
+.cscroll[data-active="true"],
+.cscroll[data-dragging="true"] {
+  opacity: 1;
+}
+
+.cscroll:hover .cscroll__thumb,
+.cscroll[data-dragging="true"] .cscroll__thumb {
+  width: 7px;
+}
+
+.cscroll[data-empty="true"],
+.is-loading .cscroll {
+  display: none;
+}
+
+/* Тач-экраны: бегунок виден только во время прокрутки, тоньше и не ловит касания */
+@media (hover: none) {
+  .cscroll {
+    opacity: 0;
+    pointer-events: none;
+    right: 2px;
+  }
+  .cscroll__thumb {
+    width: 3px;
+  }
+  .cscroll[data-active="true"] {
+    opacity: 0.9;
+  }
+}
+
+/* ───────── Появление/скрытие (общая «подача», как у интро героя) ───────── */
+
+.motion-reveal {
+  transition:
+    transform var(--dur-reveal) var(--ease-reveal),
+    opacity var(--dur-reveal) var(--ease-reveal);
+}
+
+.motion-reveal[data-hidden="true"] {
+  transform: translate3d(0, calc(-100% - 16px), 0);
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* ───────── Модалка ───────── */
+
+@media (prefers-reduced-motion: no-preference) {
+  .modal-backdrop {
+    animation: page-fade 280ms var(--ease-out-soft) both;
+  }
+  .modal-panel {
+    animation: modal-in 380ms var(--ease-out-soft) both;
+  }
+}
+
+@keyframes modal-in {
+  from {
+    opacity: 0;
+    transform: translateY(16px) scale(0.985);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* ───────── Прочее ───────── */
+
+.scrollbar-none {
+  scrollbar-width: none;
+}
+.scrollbar-none::-webkit-scrollbar {
+  display: none;
+}
+
+.link-underline {
+  background-image: linear-gradient(currentColor, currentColor);
+  background-size: 0% 1px;
+  background-position: 0 100%;
+  background-repeat: no-repeat;
+  transition: background-size 0.4s var(--ease-out-soft);
+}
+.link-underline:hover,
+.link-underline:focus-visible {
+  background-size: 100% 1px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
